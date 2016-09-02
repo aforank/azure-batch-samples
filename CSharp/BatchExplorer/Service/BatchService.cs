@@ -118,12 +118,16 @@ namespace Microsoft.Azure.BatchExplorer.Service
         /// <returns></returns>
         public IPagedEnumerable<CloudPool> ListPools(DetailLevel detailLevel = null)
         {
-            return this.Client.PoolOperations.ListPools(detailLevel);
+            IPagedEnumerable <CloudPool> pools = this.Client.PoolOperations.ListPools();
+            return pools;
         }
 
-        public Task<CloudPool> GetPoolAsync(string poolId)
+        public async Task<CloudPool> GetPoolAsync(string poolId)
         {
-            return this.Client.PoolOperations.GetPoolAsync(poolId);
+            ODATADetailLevel detailLevel = new ODATADetailLevel();
+            detailLevel.ExpandClause = "stats";
+            CloudPool pool = await this.Client.PoolOperations.GetPoolAsync(poolId, detailLevel);
+            return pool;
         }
 
         /// <summary>
@@ -237,7 +241,7 @@ namespace Microsoft.Azure.BatchExplorer.Service
 
             if (eval.Error == null)
             {
-                return eval.Results;
+                return eval.Results.Replace(";", Environment.NewLine);
             }
             else
             {                    
